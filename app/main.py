@@ -1,9 +1,17 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
 from pydantic import BaseModel
 from datetime import datetime, timezone
 import uuid
+import logging
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(message)s"
+)
+
+logger = logging.getLogger("loopchat")
 
 app = FastAPI(title="LoopChat API")
 
@@ -31,16 +39,34 @@ def health():
     return {"status": "ok"}
 
 @app.post("/chat")
-def chat(request: ChatRequest):
-    message = request.message.lower()
+def chat(
+    chat_request: ChatRequest,
+    http_request: Request
+):
+    message = chat_request.message.lower()
 
     conversation_id = (
-    	request.conversation_id
+    	chat_request.conversation_id
     	or f"{uuid.uuid4()}"
     )
 
     message_id = f"{uuid.uuid4()}"
     timestamp = datetime.now(timezone.utc).isoformat()
+
+    client_ip = http_request.client.host
+
+    origin = http_request.headers.get(
+    	"origin",
+        "unknown"
+    )
+
+    logger.info(
+        f"REQUEST "
+        f"conversation_id={conversation_id} "
+        f"client_ip={client_ip} "
+        f"origin={origin} "
+        f"message='{message}'"
+    )
 
     # Appointment workflow
     if any(word in message for word in [
