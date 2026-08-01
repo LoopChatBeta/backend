@@ -3,5 +3,10 @@ from abc import ABC, abstractmethod
 class LLMProvider(ABC):
 
     @abstractmethod
-    def chat(self, prompt: str):
+    def chat(
+        self,
+        system_prompt: str,
+        user_message: str,
+        history: list = []
+    ) -> str:
         pass

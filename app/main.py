@@ -8,6 +8,7 @@ import logging
 
 from app.models.chat import ChatRequest
 from app.intent.rules import RulesIntentEngine
+from app.providers.mock_llm import MockLLM
 from app.services.chat_service import ChatService
 
 logging.basicConfig(
@@ -28,7 +29,8 @@ app.add_middleware(
 )
 
 intent_engine = RulesIntentEngine()
-chat_service = ChatService(intent_engine)
+llm = MockLLM()
+chat_service = ChatService(intent_engine, llm)
 
 @app.get("/")
 def root():
